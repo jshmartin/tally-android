@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Tally brand palette; keep in sync with ui/theme/Color.kt -->
+    <color name="tally_forest">#FF1E6B52</color>
+    <color name="tally_mint">#FF8CD5B5</color>
+    <color name="tally_paper">#FFF7F8F5</color>
+    <color name="tally_night">#FF0F1412</color>
+</resources>

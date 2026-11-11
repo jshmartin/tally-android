@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Tally</string>
+    <string name="capture_service_label">Tally purchase capture</string>
+</resources>
