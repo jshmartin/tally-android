@@ -1,6 +1,7 @@
 package com.example.tally.data
 
 import android.content.Context
+import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
@@ -16,7 +17,9 @@ import com.example.tally.data.model.Txn
 
 @Database(
     entities = [Category::class, Txn::class, MerchantRule::class, SourceApp::class, DismissedCapture::class],
-    version = 1,
+    version = 2,
+    // Version 2 adds transactions.mergedKeys.
+    autoMigrations = [AutoMigration(from = 1, to = 2)],
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun txnDao(): TxnDao

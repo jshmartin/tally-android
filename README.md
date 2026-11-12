@@ -58,6 +58,15 @@ Some apps send alerts with no wording at all, and Tally reads those by their lay
 
 Chat and SMS notifications are only recorded if they also read like a bank alert, mentioning a card, account, transaction or similar. A friend texting "I paid $40 for the tickets" isn't recorded. The wordless layouts above are never read from a chat or SMS, since anyone can type a card, a merchant and an amount.
 
+### One purchase, two alerts
+
+A purchase is often reported twice: by the wallet you tapped with and by the card's bank, or by PayPal and by the card behind it. Tally keeps one transaction. The first alert creates it, and an alert from another app within five minutes is added to it when either of these holds:
+
+- **Same amount and merchant.** The amounts are equal and the merchants' names start alike, or one alert has no merchant.
+- **The card names the other app.** A card alert reading "PAYPAL *CORNER BOOKS" belongs with PayPal's own alert even when the amounts differ, as they do when PayPal charges in another currency. The transaction then takes the card's amount and PayPal's name for the merchant.
+
+Each app's alert can join a transaction once, so two purchases of the same amount in a row stay two. Both alerts' text is kept on the transaction. Once you've reviewed a transaction, a late second alert is still attached to it but changes nothing you checked.
+
 ### Review
 
 Captured transactions aren't trusted blindly. Each one waits in **Review** with the notification's text beside it, where you can:

@@ -1,5 +1,6 @@
 package com.example.tally.data.model
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
@@ -64,6 +65,11 @@ data class Txn(
     val needsReview: Boolean = false,
     /** Identifies the notification, so a re-posted notification isn't recorded twice. */
     val dedupeKey: String? = null,
+    /**
+     * The same for other apps' notifications about this purchase, one per line. A tap to pay is often
+     * reported by both the wallet and the card's bank, and both become this one transaction.
+     */
+    @ColumnInfo(defaultValue = "") val mergedKeys: String = "",
     val createdAt: Long,
 )
 

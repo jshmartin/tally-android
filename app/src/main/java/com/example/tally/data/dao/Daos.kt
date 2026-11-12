@@ -60,6 +60,31 @@ interface TxnDao {
     @Query("SELECT * FROM transactions WHERE id = :id")
     suspend fun get(id: Long): Txn?
 
+    /** Whether the notification with this dedupe key already became a transaction, on its own or merged into one. */
+    @Query(
+        """
+        SELECT EXISTS(
+            SELECT 1 FROM transactions WHERE dedupeKey = :key
+                OR instr(char(10) || mergedKeys || char(10), char(10) || :key || char(10)) > 0
+        )
+        """
+    )
+    suspend fun hasCapture(key: String): Boolean
+
+    /**
+     * Captures of [kind] from apps other than [packageName] with [from] <= occurredAt <= [to], the one
+     * nearest [at] first. These are the ones a new alert from [packageName] might be repeating.
+     */
+    @Query(
+        """
+        SELECT * FROM transactions
+        WHERE source = 'NOTIFICATION' AND kind = :kind AND sourceApp IS NOT NULL AND sourceApp != :packageName
+            AND occurredAt BETWEEN :from AND :to
+        ORDER BY ABS(occurredAt - :at), id
+        """
+    )
+    suspend fun capturesNear(kind: Kind, packageName: String, from: Long, to: Long, at: Long): List<Txn>
+
     /** Returns -1 when a transaction with the same dedupe key already exists. */
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(txn: Txn): Long
