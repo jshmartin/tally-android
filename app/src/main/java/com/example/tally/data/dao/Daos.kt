@@ -44,6 +44,13 @@ interface TxnDao {
     @Query("$ROW_SELECT WHERE t.occurredAt >= :start AND t.occurredAt < :end ORDER BY t.occurredAt DESC, t.id DESC")
     fun observeRows(start: Long, end: Long): Flow<List<TxnRow>>
 
+    /** Transactions with [start] <= occurredAt < [end], oldest first, for exporting. */
+    @Query("$ROW_SELECT WHERE t.occurredAt >= :start AND t.occurredAt < :end ORDER BY t.occurredAt, t.id")
+    suspend fun rowsOldestFirst(start: Long, end: Long): List<TxnRow>
+
+    @Query("SELECT COUNT(*) FROM transactions WHERE occurredAt >= :start AND occurredAt < :end")
+    suspend fun count(start: Long, end: Long): Int
+
     @Query("$ROW_SELECT WHERE t.needsReview = 1 ORDER BY t.occurredAt DESC, t.id DESC")
     fun observeReviewRows(): Flow<List<TxnRow>>
 

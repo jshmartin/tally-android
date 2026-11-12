@@ -23,6 +23,20 @@ Every transaction in the month, grouped by day, with each day's spending. A ⚡ 
 
 When you type a merchant on the add form, Tally fills in the category that merchant usually gets. If you pick a category yourself, it stops suggesting.
 
+#### Exporting to a spreadsheet
+
+Tap **⋮ → Export to spreadsheet** and choose the selected month, its whole year, or everything. Android then asks where to save the file. It can go in Downloads, Google Drive, or any other place the save dialog offers. Once it's saved, **Open** in the confirmation opens the file in your spreadsheet app.
+
+The file is an Excel workbook (.xlsx), which Google Sheets, Excel, Numbers and LibreOffice all open. It has one row per transaction, oldest first, with these columns:
+
+- **Date** and **Time**, stored as real dates and times so you can sort them.
+- **Merchant**, **Category** and **Note**. A transaction with no category says "Uncategorized".
+- **Spent** and **Income**. Each transaction fills one of the two, like a bank statement, so both columns add up to positive totals.
+- **Source:** "Added by hand", or the app the purchase was captured from.
+- **Status:** "To review" or "Not counted yet" for captures you haven't checked. It's blank once you've kept them.
+
+The header row stays in view while you scroll and has filters. Captures that don't count yet are still listed. Filter out "Not counted yet" under Status and your totals will match the app's. The notification's own text isn't exported.
+
 ### Budgets
 
 Each spending category can have a monthly budget, which applies every month. A category's bar is green while there's room, amber from 80% and red once you're over. Spending with no category is listed separately so you can see what isn't counted against a budget.
@@ -112,6 +126,9 @@ Only notifications posted while access is on are read. Notifications already in 
 | `capture/PurchaseNotificationListener.kt` | The `NotificationListenerService` that hands notifications to the recorder. |
 | `capture/NotificationAccess.kt` | Checks for notification access and opens its settings page. |
 | `data/` | Room database: `categories`, `transactions`, `merchant_rules`, `source_apps`, `dismissed_captures`. Schemas are exported to `app/schemas`. |
+| `export/Xlsx.kt` | Writes a one-sheet .xlsx workbook with typed cells. Pure Kotlin, no library. |
+| `export/TxnSheet.kt` | Turns transactions into the export's rows and columns, and defines the periods you can export. |
+| `export/TxnExporter.kt` | Reads a period's transactions and writes the file to the place the user picked. |
 | `ui/` | Compose screens, one package per tab plus `review` and the transaction form. |
 | `util/Money.kt` | Formatting and parsing amounts. Amounts are stored as whole cents in a `Long`. |
 
@@ -123,17 +140,19 @@ Open the folder in Android Studio, or build from the command line:
 ./gradlew :app:assembleDebug
 ```
 
-Unit tests cover the parser (real-world alert formats, plus things that must be skipped), the categorizer and money parsing:
+Unit tests cover the parser (real-world alert formats, plus things that must be skipped), the categorizer, money parsing and the spreadsheet export:
 
 ```bash
 ./gradlew :app:testDebugUnitTest
 ```
 
-Instrumented tests cover the recorder against a real database: deduplication, dismissing, turned-off apps and merchant rules. They need a device or emulator:
+Instrumented tests cover the recorder against a real database (deduplication, dismissing, turned-off apps and merchant rules) and the exporter. They need a device or emulator:
 
 ```bash
 ./gradlew :app:connectedDebugAndroidTest
 ```
+
+By default this uninstalls Tally when it's done, which deletes its data on that device. To keep the app and its data, add `-Pandroid.injected.androidTest.leaveApksInstalledAfterRun=true`.
 
 To try capture on an emulator without a bank app, grant access and post a fake alert from the shell:
 
