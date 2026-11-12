@@ -152,7 +152,11 @@ fun TxnListItem(row: TxnRow, onClick: () -> Unit, modifier: Modifier = Modifier)
                     overflow = TextOverflow.Ellipsis,
                 )
                 if (row.needsReview) {
-                    Text("· To review", color = MaterialTheme.colorScheme.tertiary, maxLines = 1)
+                    Text(
+                        if (row.counted) "· To review" else "· Not counted yet",
+                        color = MaterialTheme.colorScheme.tertiary,
+                        maxLines = 1,
+                    )
                 }
             }
         },

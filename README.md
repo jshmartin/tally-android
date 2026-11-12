@@ -19,7 +19,7 @@ The month switcher at the top is shared. Changing the month on one tab changes i
 
 ### Activity
 
-Every transaction in the month, grouped by day, with each day's spending. A ⚡ marks one that was captured from a notification, and "To review" marks one you haven't checked yet. Tap a transaction to edit or delete it, or tap **+** to add one by hand.
+Every transaction in the month, grouped by day, with each day's spending. A ⚡ marks one that was captured from a notification, and "To review" marks one you haven't checked yet. "Not counted yet" marks a capture that isn't in your totals until you keep it (see [Review](#review)). Tap a transaction to edit or delete it, or tap **+** to add one by hand.
 
 When you type a merchant on the add form, Tally fills in the category that merchant usually gets. If you pick a category yourself, it stops suggesting.
 
@@ -76,7 +76,7 @@ Captured transactions aren't trusted blindly. Each one waits in **Review** with 
 - **Discard** it if it wasn't a purchase. Tally remembers that notification so it isn't recorded again if the app posts it again. Undo is available briefly.
 - **Tap it** to edit the amount, merchant, date or note.
 
-Captured transactions count toward your totals and budgets as soon as they arrive, before you review them.
+A captured transaction counts toward your totals and budgets as soon as it arrives, as long as you've kept a purchase from that app before (with **Keep**, **Keep all**, or by saving it from the edit form). The first captures from a new app wait in Review marked "Not counted yet" and count once you keep one of them; after that, the app's captures count right away. That way a new app, or a notification made to look like your bank's, can't change your numbers before you've seen it.
 
 ### Categories
 

@@ -169,6 +169,13 @@ private fun ReviewCard(
                 Spacer(Modifier.width(8.dp))
                 AmountText(row.amountCents, row.kind, style = MaterialTheme.typography.titleMedium)
             }
+            if (!row.counted) {
+                Text(
+                    "Not counted until you keep a purchase from ${row.sourceAppLabel ?: "this app"}.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.tertiary,
+                )
+            }
             if (!row.sourceText.isNullOrBlank()) {
                 Surface(
                     color = MaterialTheme.colorScheme.surfaceContainerHigh,

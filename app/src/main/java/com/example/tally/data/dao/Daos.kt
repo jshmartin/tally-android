@@ -19,9 +19,19 @@ import com.example.tally.data.model.Txn
 import com.example.tally.data.model.TxnRow
 import kotlinx.coroutines.flow.Flow
 
+/**
+ * Whether transaction `t` counts toward totals and budgets. A capture waiting for review counts once
+ * the user has kept a capture from the same app. Until then it only shows in lists and in Review, so
+ * a new app, or a notification made to look like a bank's, can't change the numbers unseen.
+ */
+private const val COUNTS = """
+    (t.needsReview = 0 OR t.sourceApp IN (
+        SELECT sourceApp FROM transactions WHERE needsReview = 0 AND sourceApp IS NOT NULL))
+"""
+
 private const val ROW_SELECT = """
     SELECT t.id, t.amountCents, t.kind, t.merchant, t.note, t.occurredAt, t.source, t.sourceApp,
-        a.label AS sourceAppLabel, t.sourceText, t.needsReview, t.categoryId,
+        a.label AS sourceAppLabel, t.sourceText, t.needsReview, $COUNTS AS counted, t.categoryId,
         c.name AS categoryName, c.iconKey AS categoryIcon, c.color AS categoryColor
     FROM transactions t
     LEFT JOIN categories c ON c.id = t.categoryId
@@ -40,19 +50,21 @@ interface TxnDao {
     @Query("SELECT COUNT(*) FROM transactions WHERE needsReview = 1")
     fun observeReviewCount(): Flow<Int>
 
+    /** What counts toward the totals with [start] <= occurredAt < [end]. */
     @Query(
         """
-        SELECT COALESCE(SUM(CASE WHEN kind = 'EXPENSE' THEN amountCents ELSE 0 END), 0) AS spentCents,
-            COALESCE(SUM(CASE WHEN kind = 'INCOME' THEN amountCents ELSE 0 END), 0) AS incomeCents
-        FROM transactions WHERE occurredAt >= :start AND occurredAt < :end
+        SELECT COALESCE(SUM(CASE WHEN t.kind = 'EXPENSE' THEN t.amountCents ELSE 0 END), 0) AS spentCents,
+            COALESCE(SUM(CASE WHEN t.kind = 'INCOME' THEN t.amountCents ELSE 0 END), 0) AS incomeCents
+        FROM transactions t WHERE t.occurredAt >= :start AND t.occurredAt < :end AND $COUNTS
         """
     )
     fun observeTotals(start: Long, end: Long): Flow<MonthTotals>
 
     @Query(
         """
-        SELECT COALESCE(SUM(amountCents), 0) FROM transactions
-        WHERE categoryId IS NULL AND kind = 'EXPENSE' AND occurredAt >= :start AND occurredAt < :end
+        SELECT COALESCE(SUM(t.amountCents), 0) FROM transactions t
+        WHERE t.categoryId IS NULL AND t.kind = 'EXPENSE' AND t.occurredAt >= :start AND t.occurredAt < :end
+            AND $COUNTS
         """
     )
     fun observeUncategorizedSpent(start: Long, end: Long): Flow<Long>
@@ -110,14 +122,17 @@ interface CategoryDao {
     @Query("SELECT * FROM categories ORDER BY kind, sortOrder, name")
     fun observeAll(): Flow<List<Category>>
 
-    /** Every category with its total for [start] <= occurredAt < [end], including categories with none. */
+    /**
+     * Every category with what counts toward it for [start] <= occurredAt < [end], including
+     * categories with nothing.
+     */
     @Query(
         """
         SELECT c.id, c.name, c.kind, c.iconKey, c.color, c.monthlyBudgetCents, c.sortOrder,
             COALESCE(SUM(t.amountCents), 0) AS totalCents, COUNT(t.id) AS count
         FROM categories c
         LEFT JOIN transactions t ON t.categoryId = c.id AND t.kind = c.kind
-            AND t.occurredAt >= :start AND t.occurredAt < :end
+            AND t.occurredAt >= :start AND t.occurredAt < :end AND $COUNTS
         GROUP BY c.id
         ORDER BY c.kind, c.sortOrder, c.name
         """

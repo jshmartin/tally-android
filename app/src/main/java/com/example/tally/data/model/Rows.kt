@@ -13,6 +13,11 @@ data class TxnRow(
     val sourceAppLabel: String?,
     val sourceText: String?,
     val needsReview: Boolean,
+    /**
+     * Whether it counts toward totals and budgets. A capture from an app the user hasn't kept one from
+     * yet doesn't, until it's kept.
+     */
+    val counted: Boolean,
     val categoryId: Long?,
     val categoryName: String?,
     val categoryIcon: String?,

@@ -75,6 +75,37 @@ class PurchaseRecorderTest {
 
     private suspend fun rows() = db.txnDao().observeRows(0, Long.MAX_VALUE).first()
 
+    private suspend fun spent() = db.txnDao().observeTotals(0, Long.MAX_VALUE).first().spentCents
+
+    @Test
+    fun aNewAppsCapturesCountOnceOneIsKept() = runBlocking {
+        val first = recorder.record(notification("You spent \$12.34 at STARBUCKS", key = "a"))!!
+        assertEquals(0L, spent())
+        assertFalse(rows().single().counted)
+
+        db.txnDao().markReviewed(first)
+        assertEquals(1234L, spent())
+
+        // The app has had a capture kept, so its next one counts while it waits for review.
+        recorder.record(notification("You spent \$5.00 at STARBUCKS", key = "b"))
+        assertEquals(1734L, spent())
+        assertTrue(rows().all { it.counted })
+    }
+
+    @Test
+    fun keepingOneAppsCaptureDoesNotTrustAnother() = runBlocking {
+        db.txnDao().markReviewed(recorder.record(notification("You spent \$12.34 at STARBUCKS"))!!)
+        val other = "com.example.other"
+        recorder.record(notification("You spent \$40.00 at SHELL", key = "x", packageName = other))
+        recorder.record(notification("You spent \$9.00 at ZYXWV GADGETS", key = "y", packageName = other))
+
+        assertEquals(1234L, spent())
+        val spending = db.categoryDao().observeSpending(0, Long.MAX_VALUE).first()
+        assertEquals(0L, spending.single { it.name == StarterCategories.TRANSPORT }.totalCents)
+        assertEquals(0L, db.txnDao().observeUncategorizedSpent(0, Long.MAX_VALUE).first())
+        assertEquals(listOf(false, false), rows().filter { it.sourceApp == other }.map { it.counted })
+    }
+
     @Test
     fun recordsAPurchaseForReviewWithAGuessedCategory() = runBlocking {
         val id = recorder.record(notification("You spent \$12.34 at STARBUCKS"))

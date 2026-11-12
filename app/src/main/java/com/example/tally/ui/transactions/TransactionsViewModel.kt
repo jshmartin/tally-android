@@ -41,7 +41,7 @@ class TransactionsViewModel(private val app: TallyApp) : ViewModel() {
                 month = month,
                 totals = totals,
                 days = rows.groupBy { it.occurredAt.toLocalDate() }.map { (date, dayRows) ->
-                    Day(date, dayRows.filter { it.kind == Kind.EXPENSE }.sumOf { it.amountCents }, dayRows)
+                    Day(date, dayRows.filter { it.kind == Kind.EXPENSE && it.counted }.sumOf { it.amountCents }, dayRows)
                 },
                 reviewCount = review,
                 loaded = true,
