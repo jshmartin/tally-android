@@ -18,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -50,7 +51,8 @@ private enum class Tab(val route: String, val label: String, val icon: ImageVect
     Overview(Routes.OVERVIEW, "Overview", Icons.Filled.Home),
     Activity(Routes.TRANSACTIONS, "Activity", Icons.AutoMirrored.Filled.ReceiptLong),
     Budgets(Routes.BUDGETS, "Budgets", Icons.Filled.PieChart),
-    Capture(Routes.AUTOMATION, "Auto-capture", Icons.Filled.Bolt),
+    // "Auto-capture" wraps in a quarter-width slot; the screen's own title keeps the full name.
+    Capture(Routes.AUTOMATION, "Capture", Icons.Filled.Bolt),
 }
 
 private fun NavHostController.openTab(route: String) = navigate(route) {
@@ -79,7 +81,7 @@ fun AppNavigation() {
                             selected = currentRoute == tab.route,
                             onClick = { nav.openTab(tab.route) },
                             icon = { Icon(tab.icon, contentDescription = null) },
-                            label = { Text(tab.label) },
+                            label = { Text(tab.label, maxLines = 1, overflow = TextOverflow.Ellipsis) },
                         )
                     }
                 }
