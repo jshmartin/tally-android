@@ -146,10 +146,13 @@ fun TxnListItem(row: TxnRow, onClick: () -> Unit, modifier: Modifier = Modifier)
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
+                // Weighted so it's measured after the review label: when space runs short, the
+                // category shortens with an ellipsis and the label stays whole.
                 Text(
                     text = listOf(row.categoryName ?: "Uncategorized", row.occurredAt.timeLabel()).joinToString(" · "),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f, fill = false),
                 )
                 if (row.needsReview) {
                     Text(
