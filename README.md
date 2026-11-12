@@ -51,7 +51,12 @@ Some alerts are skipped even when they mention money: promotions ("$10 off"), de
 
 The merchant comes from the alert's wording, such as "at STARBUCKS", "transaction with TARGET", "You paid Jordan Lee", "from Sam" or "to COMCAST". Tally cleans it up along the way. It strips store numbers and processor prefixes like `SQ *`, and turns ALL-CAPS names into normal case. Tap-to-pay wallets often put the merchant in the title and only the amount in the text, so Tally uses the title when it isn't just the app's name.
 
-Chat and SMS notifications only count if they also read like a bank alert, mentioning a card, account, transaction or similar. A friend texting "I paid $40 for the tickets" isn't recorded.
+Some apps send alerts with no wording at all, and Tally reads those by their layout:
+
+- **CIBC:** no title, and a text of three lines: the card ("CIBC Dividend Visa Card, 1234"), the merchant and the amount.
+- **Samsung Wallet:** the card's name as the title, and a text that is only the merchant and the amount ("CANADIAN TIRE #608 $13.42").
+
+Chat and SMS notifications are only recorded if they also read like a bank alert, mentioning a card, account, transaction or similar. A friend texting "I paid $40 for the tickets" isn't recorded. The wordless layouts above are never read from a chat or SMS, since anyone can type a card, a merchant and an amount.
 
 ### Review
 
@@ -83,6 +88,7 @@ Only notifications posted while access is on are read. Notifications already in 
 ## Limits
 
 - **Wording:** the parser is written for English alerts in the usual US style. An app that phrases alerts differently may not be recognized. **Try a notification** shows whether a given alert is.
+- **Length:** a notification over 1,000 characters, title and text together, is skipped. Real alerts are a few lines long. Longer text is an email or a chat, and reading it would be slow.
 - **Currency:** amounts are shown in the phone's currency, and nothing is converted. A captured "€12.00" is stored as 12.00 like any other amount.
 - **Notification access:** if you turn it off, or Android revokes it, nothing is captured until it's back on. The Auto-capture tab shows the current state.
 - **Transfers:** moving money between your own accounts looks like spending on one side and income on the other. Discard whichever side you don't want counted.

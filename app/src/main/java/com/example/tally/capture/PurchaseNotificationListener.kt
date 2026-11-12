@@ -13,6 +13,21 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
+private val WHITESPACE = Regex("""\s+""")
+
+/**
+ * The text to read from a notification that has a short form and an expanded one. The expanded one
+ * usually says more. But some apps (CIBC) build it from HTML, which turns its line breaks into
+ * spaces, and the lines are what tell the card, merchant and amount apart. So when both say the same
+ * thing, the one that kept its line breaks wins.
+ */
+internal fun bodyText(text: String?, bigText: String?): String? {
+    if (bigText.isNullOrBlank()) return text
+    if (text.isNullOrBlank()) return bigText
+    val sameWords = text.trim().replace(WHITESPACE, " ") == bigText.trim().replace(WHITESPACE, " ")
+    return if (sameWords && '\n' in text.trim() && '\n' !in bigText.trim()) text else bigText
+}
+
 /**
  * Hands every new notification to [PurchaseRecorder]. Android binds this service once the user turns
  * on Tally under Settings > Notification access, and keeps it running from then on.
@@ -33,8 +48,10 @@ class PurchaseNotificationListener : NotificationListenerService() {
 
         val extras = notification.extras ?: return
         val title = extras.getCharSequence(Notification.EXTRA_TITLE)?.toString()
-        val text = (extras.getCharSequence(Notification.EXTRA_BIG_TEXT)
-            ?: extras.getCharSequence(Notification.EXTRA_TEXT))?.toString()
+        val text = bodyText(
+            text = extras.getCharSequence(Notification.EXTRA_TEXT)?.toString(),
+            bigText = extras.getCharSequence(Notification.EXTRA_BIG_TEXT)?.toString(),
+        )
         if (title.isNullOrBlank() && text.isNullOrBlank()) return
 
         val captured = CapturedNotification(
