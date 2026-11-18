@@ -42,8 +42,8 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
-        fun build(context: Context): AppDatabase =
-            Room.databaseBuilder(context, AppDatabase::class.java, "tally.db")
+        fun build(context: Context, name: String = "tally.db"): AppDatabase =
+            Room.databaseBuilder(context, AppDatabase::class.java, name)
                 .addCallback(SEED_ON_CREATE)
                 .build()
     }

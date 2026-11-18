@@ -32,6 +32,7 @@ import com.example.tally.ui.automation.AutomationScreen
 import com.example.tally.ui.budgets.BudgetsScreen
 import com.example.tally.ui.overview.OverviewScreen
 import com.example.tally.ui.review.ReviewScreen
+import com.example.tally.ui.settings.SettingsScreen
 import com.example.tally.ui.transactions.TransactionsScreen
 import com.example.tally.ui.transactions.TxnEditScreen
 
@@ -41,6 +42,7 @@ object Routes {
     const val BUDGETS = "budgets"
     const val AUTOMATION = "automation"
     const val REVIEW = "review"
+    const val SETTINGS = "settings"
     const val EDIT = "transaction?id={id}&kind={kind}"
 
     /** A null [id] adds a new transaction of [kind]. */
@@ -103,6 +105,7 @@ fun AppNavigation() {
                     onReview = { nav.navigate(Routes.REVIEW) },
                     onSeeAll = { nav.openTab(Routes.TRANSACTIONS) },
                     onBudgets = { nav.openTab(Routes.BUDGETS) },
+                    onSettings = { nav.navigate(Routes.SETTINGS) },
                 )
             }
             composable(Routes.TRANSACTIONS) {
@@ -116,6 +119,7 @@ fun AppNavigation() {
             composable(Routes.AUTOMATION) {
                 AutomationScreen(onReview = { nav.navigate(Routes.REVIEW) })
             }
+            composable(Routes.SETTINGS) { SettingsScreen(onBack = { nav.popBackStack() }) }
             composable(Routes.REVIEW) {
                 ReviewScreen(
                     onBack = { nav.popBackStack() },
